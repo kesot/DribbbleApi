@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -13,6 +14,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Threading;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace DribbleApi
 {
@@ -26,10 +29,10 @@ namespace DribbleApi
 		{
 			InitializeComponent();
 		}
-
+		
 		private void Form1_Load(object sender, EventArgs e)
 		{
-			//webBrowser1.Navigate("http://localhost:123/?code=06cef3a5d7699f4989317f10000c192c69a9c20372d305c3ca67fde3a85d0473");
+			button1.Enabled = false;
 			webBrowser1.Navigated += OnNavigate;
 			TcpListener tl = new TcpListener(8080);
 			tl.Start();
@@ -41,23 +44,29 @@ namespace DribbleApi
 					ThreadPool.QueueUserWorkItem(u =>
 					{
 						string Html = "<html><body><h1>It works!</h1></body></html>";
-						// Необходимые заголовки: ответ сервера, тип и длина содержимого. После двух пустых строк - само содержимое
 						string Str = "HTTP/1.1 200 OK\nContent-type: text/html\nContent-Length:" + Html.Length.ToString() + "\r\n\r\n" + Html;
-						// Приведем строку к виду массива байт
 						byte[] Buffer = Encoding.ASCII.GetBytes(Str);
-						// Отправим его клиенту
-						//while ((tc.GetStream().ReadByte()) != -1) ;
 						tc.GetStream().Write(Buffer, 0, Buffer.Length);
-						// Закроем соединение
 						tc.Close();
 					});
 				}
 			});
 			webBrowser1.Navigate("https://dribbble.com/oauth/authorize?client_id="+ClientIdString);
-			
 		}
 
 		private string code;
+		private string accessToken;
+
+		string GetJsonResponse(string uri, string method)
+		{
+			HttpWebRequest request = WebRequest.CreateHttp(uri);
+
+			request.Method = method;
+			WebResponse resp = request.GetResponse();
+			
+			var reader = new StreamReader(resp.GetResponseStream());
+			return reader.ReadToEnd();
+		}
 		void Authorize()
 		{
 			var uri =
@@ -65,13 +74,20 @@ namespace DribbleApi
 				"?client_id=" + ClientIdString +
 				"&client_secret=" + ClientSecretString +
 				"&code=" + code;
-			HttpWebRequest request =
-				WebRequest.CreateHttp(uri);
+			var obj = JObject.Parse(GetJsonResponse(uri, "POST"));
+			accessToken = (string)obj["access_token"];
+			button1.Enabled = true;
+		}
 
-			//request.Headers.Add("Authorization", "DirectCrm key=\"zO3d06YKthe9R9h7UIFb\" customerId=\"\" sessionKey=\"\"");
-			request.Method = "POST";
-			WebResponse resp = request.GetResponse();
-			
+		void GetBuckets()
+		{
+			button1.Enabled = false;
+			string uri = "https://api.dribbble.com/v1/user/buckets?access_token="+accessToken;
+
+			richTextBox1.Text= GetJsonResponse(uri, "GET");
+			groupBox1.Visible = false;
+			button1.Enabled = true;
+
 		}
 		void OnNavigate(object sender, EventArgs e)
 		{
@@ -84,7 +100,7 @@ namespace DribbleApi
 
 		private void button1_Click(object sender, EventArgs e)
 		{
-			textBox1.Text = webBrowser1.Url.ToString();
+			GetBuckets();
 		}
 		
 	}

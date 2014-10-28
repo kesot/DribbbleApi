@@ -7,3 +7,5 @@ C:\Users\Константин\OneDrive\Development\DribbbleApi\DribbleApi\Dribbl
 C:\Users\Константин\OneDrive\Development\DribbbleApi\DribbleApi\DribbleApi\obj\Debug\DribbleApi.csproj.GenerateResource.Cache
 C:\Users\Константин\OneDrive\Development\DribbbleApi\DribbleApi\DribbleApi\obj\Debug\DribbleApi.exe
 C:\Users\Константин\OneDrive\Development\DribbbleApi\DribbleApi\DribbleApi\obj\Debug\DribbleApi.pdb
+C:\Users\Константин\OneDrive\Development\DribbbleApi\DribbleApi\DribbleApi\bin\Debug\Newtonsoft.Json.dll
+C:\Users\Константин\OneDrive\Development\DribbbleApi\DribbleApi\DribbleApi\bin\Debug\Newtonsoft.Json.xml
